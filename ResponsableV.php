@@ -19,8 +19,8 @@ class ResponsableV {
         $this -> rapellido = "";
     }
 
-    public function cargar ( $numLic, $nombre, $apellido){ //$numEmpleado,
-       // $this -> setRnumeroempleado ($numEmpleado);
+    public function cargar ( $numEmpleado, $numLic, $nombre, $apellido){ //$numEmpleado,
+       	$this -> setRnumeroempleado ($numEmpleado);
         $this -> setRnumerolicencia  ($numLic);
         $this -> setRnombre($nombre);
         $this -> setRapellido ($apellido);
@@ -96,7 +96,7 @@ class ResponsableV {
         $nombre = $this -> getRnombre();
         $apellido = $this -> getRapellido();
         $infoResponsable = "\nNombre:  $apellido \nApellido: $nombre
-        \nNúmero de empleado:  $numEmpleado\nNúmero de licencia:  $numLic";
+        \nNúmero de empleado:  $numEmpleado\nNúmero de licencia:  $numLic \n";
         return $infoResponsable;
     }
 
@@ -137,7 +137,7 @@ class ResponsableV {
 		if ($condicion!=""){
 		    $consultaResponsable=$consultaResponsable.' where '.$condicion;
 		}
-		$consultaResponsable.=" order by papellido ";
+		$consultaResponsable.=" order by rapellido ";
 		//echo $consultaResponsable;
 		if($base->Iniciar()){
 			if($base->Ejecutar($consultaResponsable)){				
@@ -152,17 +152,15 @@ class ResponsableV {
 					$responsable=new ResponsableV();
 					$responsable->cargar($numEmpleado,$numLic,$nombre,$apellido);
 					array_push($arregloResponsables,$responsable);
-	
+					
 				}
 				
 			
 		 	}	else {
 		 			$this->setMsjBaseDatos($base->getError());
-		 		
 			}
 		 }	else {
 		 		$this->setMsjBaseDatos($base->getError());
-		 	
 		 }	
 		 return $arregloResponsables;
 	}	

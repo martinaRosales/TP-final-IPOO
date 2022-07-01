@@ -17,8 +17,8 @@ class Viaje{
         $this -> idviaje = 0;
         $this -> vdestino = "";
         $this -> vcantmaxpasajeros = 0;
-        $this -> objEmpresa = null;
-        $this -> objResponsable = null;
+        //$this -> objEmpresa = null;
+        //$this -> objResponsable = null;
         $this -> vimporte = 0;
         $this -> tipoAsiento = "";
         $this -> idayvuelta = "";
@@ -170,12 +170,12 @@ class Viaje{
         Destino: {$this-> getVdestino()} \nCantidad máxima de pasajeros: {$this -> getVcantmaxpasajeros()}
         \nImporte: $  {$this -> getVimporte()} \nTipo asiento: {$this-> getTipoAsiento()}
         \n Ida y vuelta: {$this->getIdayvuelta()} \nResponsable del viaje:\n $infoResponsable
-         \n** INFO PASAJEROS ** {$this->infoPasajero()}" ;
+        \n** INFO PASAJEROS ** {$this->infoPasajero()}  " ; 
         return $infoViaje;
     }
 
 
-    //repetitiva que concatena la información de los pasajeros
+   //repetitiva que concatena la información de los pasajeros
     public function infoPasajero (){
         $listaPasajeros = " ";
         $pasajeros = $this -> arregloPasajeros ();
@@ -183,7 +183,7 @@ class Viaje{
            $listaPasajeros = $listaPasajeros. "\n".$pasajeros[$i]->__toString();
         }
         return $listaPasajeros;
-    }
+    } 
 
     //método para extraer la información de los pasajeros
     public function arregloPasajeros (){
@@ -214,9 +214,11 @@ class Viaje{
                     $this->setTipoAsiento($row2["tipoAsiento"]);
                     $this->setIdayvuelta($row2["idayvuelta"]);
                     $empresa = new Empresa();
-                    $this->setObjEmpresa($empresa->Buscar($idempresa));
+                    $empresa->Buscar($idempresa);
+                    $this->setObjEmpresa($empresa);
                     $responsable = new ResponsableV();
-                    $this->setObjResponsable($responsable->Buscar($numEmpleado));
+                    $responsable->Buscar($numEmpleado);
+                    $this->setObjResponsable($responsable);
                     $resp= true;
 				}				
 		 	}	else {
@@ -230,7 +232,7 @@ class Viaje{
 		 return $resp;
 	}	
     
-	public function listar($condicion){
+	public function listar($condicion=""){
 	    $arregloViajes = null;
 		$base=new BaseDatos(); 
 		$consultaViaje="Select * from viaje ";

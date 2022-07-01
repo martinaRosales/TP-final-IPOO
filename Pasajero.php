@@ -25,7 +25,7 @@ class Pasajero {
         $this -> setPdocumento ($dni);
         $this -> setPnombre ($nombre);
         $this -> setPapellido ($apellido);
-        $this -> setPtelefono ($telefono);
+        $this -> setPtelefono ($telefono);;
         $this -> setObjViaje($objViaje);
     }
 
@@ -84,9 +84,9 @@ class Pasajero {
         return $this->objViaje;
     }
 
-    public function setObjViaje($idViaje)
+    public function setObjViaje($objViaje)
     {
-        $this->idViaje = $idViaje;
+        $this->objViaje = $objViaje;
 
         return $this;
     }
@@ -107,8 +107,10 @@ class Pasajero {
 
     public function __toString()
     {
+		$objViaje = $this->getObjViaje();
+		$idViaje = $objViaje->getIdviaje();
         $infoPasajero= "\n----------------------------------------\nNro documento: {$this -> getPdocumento()}\nNombre: {$this -> getPnombre()}
-        \nApellido:  {$this->getPapellido()} \nTeléfono: {$this->getPtelefono()}\n";
+        \nApellido:  {$this->getPapellido()} \nTeléfono: {$this->getPtelefono()}\nId del viaje: $idViaje\n";
         return $infoPasajero;
     }
 
@@ -131,7 +133,8 @@ class Pasajero {
                     $idviaje=($row2["idviaje"]);
 					$resp= true;
 					$objViaje = new Viaje();
-					$this->setObjViaje($objViaje->Buscar($idviaje));
+					$objViaje->Buscar($idviaje);
+					$this->setObjViaje($objViaje);
 				}				
 			
 		 	}	else {
@@ -172,7 +175,7 @@ class Pasajero {
 					}
 				
 					$pasajero=new Pasajero();
-					$pasajero->cargar($NroDoc,$Nombre,$Apellido,$Telefono, $IdViaje);
+					$pasajero->cargar($NroDoc,$Nombre,$Apellido,$Telefono, $objViaje);
 					array_push($arregloPasajeros,$pasajero);
 	
 				}
@@ -190,11 +193,12 @@ class Pasajero {
 	}	
 
 	//decidí agregar por parámetro la variable $idviaje para resolver un error que me tiraba el programa si intentaba recuperar el id directamente desde la clase viaje.
-    public function insertar($idviaje){
+    public function insertar(){
 		$base=new BaseDatos();
-		$resp= false; ;
-		$consultaInsertar="INSERT INTO pasajero(pdocumento, pnombre, papellido, ptelefono, idviaje) 
-				VALUES ({$this->getPdocumento()},'{$this->getPnombre()}','{$this->getPapellido()}',{$this->getPtelefono()},$idviaje)";		
+		$resp= false; 
+		$objViaje = $this->getObjViaje();
+		$idviaje = $objViaje->getIdviaje();
+		$consultaInsertar="INSERT INTO pasajero	VALUES ({$this->getPdocumento()},'{$this->getPnombre()}','{$this->getPapellido()}',{$this->getPtelefono()}, $idviaje)";		
 		
 		if($base->Iniciar()){ 
 
