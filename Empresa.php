@@ -91,7 +91,7 @@ class Empresa {
         $enombre = $this -> getEnombre();
         $edireccion = $this -> getEdireccion();
 
-        $infoEmpresa = "Empresa $enombre \n $idempresa \nDirección: $edireccion \nViajes registrados: \n{$this->infoViajes()}";
+        $infoEmpresa = "Empresa $enombre \nID: $idempresa \nDirección: $edireccion \nViajes registrados: \n{$this->infoViajes()}";
         return $infoEmpresa; 
     }
 
@@ -158,11 +158,8 @@ class Empresa {
 				while($row2=$base->Registro()){
 					
 					$idempresa=$row2['idempresa'];
-					$enombre=$row2['enombre'];
-					$edireccion=$row2['edireccion'];
-				
 					$empresa=new Empresa();
-					$empresa->cargar($idempresa,$enombre,$edireccion);
+					$empresa->Buscar($idempresa);
 					array_push($arregloEmpresas,$empresa);
 	
 				}

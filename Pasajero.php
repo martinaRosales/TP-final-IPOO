@@ -163,19 +163,8 @@ class Pasajero {
 				while($row2=$base->Registro()){
 					
 					$NroDoc=$row2['pdocumento'];
-					$Nombre=$row2['pnombre'];
-					$Apellido=$row2['papellido'];
-					$Telefono=$row2['ptelefono'];
-                    $IdViaje=$row2['idviaje'];
-					$objViaje = new Viaje();
-					if ($objViaje->Buscar($IdViaje)){
-						$this->setObjViaje($objViaje);
-					} else {
-						$this->setObjViaje(null);
-					}
-				
 					$pasajero=new Pasajero();
-					$pasajero->cargar($NroDoc,$Nombre,$Apellido,$Telefono, $objViaje);
+					$pasajero->Buscar($NroDoc);
 					array_push($arregloPasajeros,$pasajero);
 	
 				}

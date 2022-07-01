@@ -143,14 +143,9 @@ class ResponsableV {
 			if($base->Ejecutar($consultaResponsable)){				
 				$arregloResponsables= array();
 				while($row2=$base->Registro()){
-					
 					$numEmpleado=$row2['rnumeroempleado'];
-					$numLic=$row2['rnumerolicencia'];
-					$nombre=$row2['rnombre'];
-					$apellido=$row2['rapellido'];
-				
 					$responsable=new ResponsableV();
-					$responsable->cargar($numEmpleado,$numLic,$nombre,$apellido);
+					$responsable->Buscar($numEmpleado);
 					array_push($arregloResponsables,$responsable);
 					
 				}

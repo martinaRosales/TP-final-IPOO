@@ -1,6 +1,11 @@
 <?php
 
-//ESTE DECIDI QUE NO SIRVE PARA LA ENTREGA, MUY COMPLEJO
+/**OBSERVACIONES: Le modifiqué la función listar() a todas las clases, siguiendo la recomendación que se me dio
+ * Modifiqué la función mostrar(), ahora no es necesario ingresar ningun id para ver datos, se impimen listas con todos los datos.
+ * Dejé datos cargados: una empresa, un responsable, un viaje y dos pasajeros.
+ */
+
+
 include "BaseDatos.php";
 include "ResponsableV.php";
 include "Empresa.php";
@@ -8,8 +13,7 @@ include "Viaje.php";
 include "Pasajero.php";
 
 
-
-$base = new BaseDatos();
+/* $base = new BaseDatos();
 if($base->Iniciar()){
     if ($base->Ejecutar("DELETE FROM pasajero")){
         echo "Se borraron los registros de la tabla pasajeros.\n";
@@ -38,8 +42,8 @@ if($base->Iniciar()){
 }else{
     echo "No se pudo borrar ningún dato anterior.\n";
     echo $base->getError();
-}  
-
+}   */
+ 
 function cargarDatos(){
     do {
         echo "¿Qué datos desea cargar?\n
@@ -773,37 +777,24 @@ function modificarPasajeros ($pdocumento){
     }
 }
 
-function mostrarDatos (){
-    echo  "Ingrese el id de la empresa cuyos datos quiera ver.\n";
-    $idempresa = trim(fgets(STDIN));
-    $objEmpresa = new Empresa;
-    if ($objEmpresa->Buscar($idempresa)){
-        echo $objEmpresa->__toString();
-    } else {
-        echo "La empresa que busca no existe.\n";
-    }
-}
 
 function mostrar (){
     do {
         echo "********* MOSTRAR DATOS *********\n
         Ingrese cuáles son los datos que desea ver:\n
-        1) Una empresa.\n
+        1) Listado de empresas.\n
         2) Listado de responsables.\n
-        3) Un viaje.\n
+        3) Listado de viajes.\n
         4) Listado de pasajeros.\n
         5) Volver atrás. \n";
         $opcion = trim(fgets(STDIN));
         if ($opcion>=1 && $opcion<=5){
             switch ($opcion){
-                case 1://Ver una Empresa.
-                    echo  "Ingrese el id de la empresa cuyos datos quiera ver.\n";
-                    $idempresa = trim(fgets(STDIN));
+                case 1://Listado de  empresas.
                     $objEmpresa = new Empresa;
-                    if ($objEmpresa->Buscar($idempresa)){
-                        echo $objEmpresa->__toString();
-                    } else {
-                        echo "La empresa que busca no existe.\n";
+                    $listaEmpresas = $objEmpresa->listar();
+                    foreach ($listaEmpresas as $key => $empresa) {
+                        echo "\n-----------------------------------------\n{$empresa->__toString()}";
                     }
                 break;
                 case 2://Listado de responsables.
@@ -813,14 +804,11 @@ function mostrar (){
                         echo "\n-----------------------------------------\n{$responsable->__toString()}";
                     }
                 break;
-                case 3://Un viaje
-                    echo "Ingrese el id del viaje que desea ver.\n";
-                    $idviaje = trim(fgets(STDIN));
+                case 3://Listado de viajes
                     $objViaje = new Viaje();
-                    if ($objViaje->Buscar($idviaje)){
-                        echo $objViaje->__toString()."\n";
-                    } else {
-                        echo "El viaje seleccionado no existe.\n";
+                    $listaViajes = $objViaje->listar();
+                    foreach ($listaViajes as $key => $viaje) {
+                        echo "\n-----------------------------------------\n{$viaje->__toString()}";
                     }
                 break;
                 case 4://Ver listado de pasajeros.
