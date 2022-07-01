@@ -95,8 +95,8 @@ class ResponsableV {
         $numLic = $this ->getRnumerolicencia();
         $nombre = $this -> getRnombre();
         $apellido = $this -> getRapellido();
-        $infoResponsable = "Responsable de viajes ". $apellido. ", ". $nombre.
-        "\nNúmero de empleado: ". $numEmpleado. "\nNúmero de licencia: ". $numLic;
+        $infoResponsable = "\nNombre:  $apellido \nApellido: $nombre
+        \nNúmero de empleado:  $numEmpleado\nNúmero de licencia:  $numLic";
         return $infoResponsable;
     }
 
@@ -130,7 +130,7 @@ class ResponsableV {
 		 return $resp;
 	}	
     
-	public function listar($condicion){
+	public function listar($condicion=""){
 	    $arregloResponsables = null;
 		$base=new BaseDatos(); 
 		$consultaResponsable="Select * from responsable ";
@@ -171,7 +171,7 @@ class ResponsableV {
 		$base=new BaseDatos();
 		$resp= false;
 		$consultaInsertar="INSERT INTO responsable( rnumerolicencia, rnombre, rapellido) 
-				VALUES ('{$this->getRnumerolicencia()}','{$this->getRnombre()}','{$this->getRapellido()}')";//rnumeroempleado,".$this->getRnumeroempleado().",
+				VALUES ('{$this->getRnumerolicencia()}','{$this->getRnombre()}','{$this->getRapellido()}')";
 		
 		if($base->Iniciar()){ 
 

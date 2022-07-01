@@ -2,33 +2,14 @@
 
 //ESTE DECIDI QUE NO SIRVE PARA LA ENTREGA, MUY COMPLEJO
 include "BaseDatos.php";
-include "Viaje.php";
 include "ResponsableV.php";
 include "Empresa.php";
+include "Viaje.php";
 include "Pasajero.php";
 
-//RESOLVER EL PROBLEMA AL CARGAR DATOS DE PASAJERO
-//RESOLVER EL PROBLEMA "no hay lugar en este viaje" CUANDO HAY CUPOS LIBRES EN agregarPasajeros()
-//TESTEAR MODIFICAR DATOS Y ELIMINAR DATOS
-//TESTEAR LA FUNCION MOSTRAR DATOS (me quede sin internet y se puso cursed el programa), adjunto evidencia
-
-/* ---------------------------------------------------------------
-**** VIAJE ****
-Destino: 6
-Cantidad máxima de pasajeros: CancunImporte: $Responsable de viajes Buendia, Rogelio
-Número de empleado: 9
-Número de licencia: 714
-Tipo asiento: 100000Ida y vuelta: cama, primera claseResponsable del viaje: Empresa Pecom
-18
-Dirección: Lago Pellegrini 3000
-Viajes registrados:
-
---------------------------------------------------------------- */
-//COMENTAR PROGRAMA Y SUBIR A GITHUB
 
 
-/* 
-$base = new BaseDatos();
+/* $base = new BaseDatos();
 if($base->Iniciar()){
     if ($base->Ejecutar("DELETE FROM pasajero")){
         echo "Se borraron los registros de la tabla pasajeros.\n";
@@ -57,20 +38,7 @@ if($base->Iniciar()){
 }else{
     echo "No se pudo borrar ningún dato anterior.\n";
     echo $base->getError();
-}
- */
-/**$baseDatos = new BaseDatos();
-$msj = $baseDatos -> Iniciar();
-if ($msj) {
-    echo "Funciona";
-} else {
-    echo "No funca";
-}
-echo $baseDatos -> getCONEXION();
- */
-
-
-//generar una funcion para ver los datos de la bbdd.
+} */
 
 function cargarDatos(){
     do {
@@ -165,16 +133,7 @@ function cargarResponsableV (){
  * @return object 
  */
 function cargarViaje (){
-    echo "Ingrese el destino del viaje.\n";
-    $destino = trim(fgets(STDIN));
-    echo "Ingrese el máximo de pasajeros.\n";
-    $maxPasajerosV = trim(fgets(STDIN));
-    echo "Ingrese el importe del viaje.\n";
-    $importe = trim(fgets(STDIN));
-    echo "Ingrese el tipo de asiento (cama o semi cama, primera clase o clase turista).\n";
-    $tipoAsiento = trim(fgets(STDIN));
-    echo "¿Es ida y vuelta? S/N.\n";
-    $idayvuelta = trim(fgets(STDIN));
+    $objViaje = new Viaje();
     echo "Ingrese el id de la empresa a la que pertenece el viaje.\n";
     $idempresa = trim(Fgets(STDIN));
     $empresa = new Empresa();
@@ -183,8 +142,23 @@ function cargarViaje (){
         $numEmpleado =trim(fgets(STDIN));
         $responsable = new ResponsableV();
         if ($responsable->Buscar($numEmpleado)){
-            $objViaje = new Viaje();
-            $objViaje->cargar($destino, $maxPasajerosV, $empresa, $responsable, $importe, $tipoAsiento, $idayvuelta);
+            do{
+                echo "Ingrese el destino del viaje.\n";
+                $destino = trim(fgets(STDIN));
+                $existe = existeDestino($destino);
+                if ($existe){
+                    echo "El destino ya existe, inténtelo de nuevo.\n";
+                }
+            } while ($existe);
+            echo "Ingrese el máximo de pasajeros.\n";
+            $maxPasajerosV = trim(fgets(STDIN));
+            echo "Ingrese el importe del viaje.\n";
+            $importe = trim(fgets(STDIN));
+            echo "Ingrese el tipo de asiento (cama o semi cama, primera clase o clase turista).\n";
+            $tipoAsiento = trim(fgets(STDIN));
+            echo "¿Es ida y vuelta? S/N.\n";
+            $idayvuelta = trim(fgets(STDIN));
+            $objViaje->cargar("",$destino, $maxPasajerosV, $empresa, $responsable, $importe, $tipoAsiento, $idayvuelta);
             $resp = $objViaje->insertar();
             if ($resp){
                 echo "El viaje fue ingresado correctamente a la base de datos.\n";
@@ -193,9 +167,24 @@ function cargarViaje (){
                 echo $objViaje->getMsjBaseDatos()."\n";
             }
         } else {
-            echo "La empresa ingresada no existe.\n";
+            echo "El responsable ingresado no existe, por favor ingrese un responsable existente para registrar el viaje.\n";
         }
+    } else {
+        echo "La empresa ingresada no existe, por favor ingrese una empresa existente para registrar el viaje.\n";
     }
+}
+
+function existeDestino ($destino){
+    $objViaje = new Viaje();
+    $listaViajes = $objViaje->Listar("vdestino='$destino'");
+    $existe=false;
+    $i  = 0;
+    if ($i < sizeof($listaViajes) && !$existe){
+        $existe = true;
+    } else {
+        $i = $i + 1;
+    }
+    return $existe;
 }
 
 function agregarPasajeros (){
@@ -212,16 +201,17 @@ function agregarPasajeros (){
             echo "Los viajes disponibles son los siguientes: \n";
             foreach ($arrayViajes as $key => $viaje) {
                 $cantMaxPasajeros = $viaje->getVcantmaxpasajeros();
-                $viaje->arregloPasajeros();
-                $arrayPasajeros = $viaje->getArrayObjPasajeros();
+                $arrayPasajeros = $viaje->arregloPasajeros();
                 if (count ($arrayPasajeros) < $cantMaxPasajeros){
                     $objEmpresa = $viaje->getObjEmpresa(); 
                     $nombreEmpresa = $objEmpresa->getEnombre();
                     $importe = $viaje->getVimporte();
                     $tipoAsiento = $viaje->getTipoAsiento();
                     $idayvuelta = $viaje->getIdayvuelta();
+                    $idviaje = $viaje->getIdviaje();
                     echo "---------------------------------------------\n
-                    VIAJE  $i 
+                    VIAJE  $i
+                    \n Id del viaje: $idviaje 
                     \n Empresa:  $nombreEmpresa
                     \n Importe: $$importe
                     \n Tipo de asiento:  $tipoAsiento
@@ -229,17 +219,16 @@ function agregarPasajeros (){
                     ---------------------------------------------\n";
                     $i = $i+1;
                 } else {
+                    $idviaje = $viaje->getIdviaje();
                     echo "VIAJE $i \n No hay asientos disponibles en este viaje.\n";
                     $i=$i+1;
                 }
             }
             echo "¿En cuál viaje desea registrar pasajeros? Ingrese 0 si no desea ninguno. \n";
             $opcion = trim(fgets(STDIN));
-            if ($opcion > 0 && $opcion <= count($arrayViajes)){
-                $existe = generarRegistroPasajeros($arrayViajes[$opcion-1]);
-                if ($existe){
-                    echo "El pasajero ingresado ya existe en este viaje.\n";
-                } 
+            if ($opcion > 0 && $opcion <= count($arrayViajes) ){
+                //$objViaje->Buscar($idviaje);
+                generarRegistroPasajeros($arrayViajes[$opcion-1]);
             } elseif ($opcion == 0) {
                 echo "VOLVIENDO AL MENU ANTERIOR.\n";
             } else {
@@ -255,22 +244,23 @@ function agregarPasajeros (){
  * @param int $maxPasajerosV, $idViaje
  */
 function generarRegistroPasajeros ($objViaje){
-    $i = 0;
+    $objPasajero = new Pasajero;
     $maxPasajerosV= $objViaje->getVcantmaxpasajeros();
+    echo $maxPasajerosV;
+    $idviaje = $objViaje->getIdviaje();
+    $arrayPasajeros = $objPasajero->Listar("idviaje=$idviaje");
+    $i = count($arrayPasajeros);
+    $seguir = "N";
     do {
-        $existe = generarPasajero($objViaje);
-            if ($existe){
-                echo "\n Por favor, inténtelo de nuevo.\n";
-            } else {
-                $i = $i+1;
-                echo "¿Desea cargar otro pasajero? S/N \n";
-                $seguir = trim(fgets(STDIN));
-                if ($i > $maxPasajerosV){
-                    echo "**********\nYa llegó al límite de pasajeros, el pasajero no entra en este viaje.\n**********\n";
-                }
-            }
-    }while ($seguir == "S" && $i <= $maxPasajerosV);
-    return $existe;
+        if ($i >= $maxPasajerosV){
+            echo "**********\nYa llegó al límite de pasajeros, el pasajero no entra en este viaje.\n**********\n";
+        }else {
+            generarPasajero($objViaje);
+            $i = $i+1;
+            echo "¿Desea cargar otro pasajero? S/N \n";
+            $seguir = trim(fgets(STDIN));
+        }
+    }while ($seguir == "S" && $i < $maxPasajerosV);
 }
 
 
@@ -280,26 +270,29 @@ function generarRegistroPasajeros ($objViaje){
  * @return object
  */
 function generarPasajero ($objViaje){
-    echo $objViaje->__toString();
-    die();
-    echo "Ingrese el nombre del pasajero.\n";
-    $nombre_pasajero = trim(fgets(STDIN));
-    echo "Ingrese el apellido del pasajero.\n";
-    $apellido_pasajero = trim(fgets(STDIN));
+    $objPasajero = new Pasajero ();
     echo "Ingrese sin puntos ni espacios el numero de documento del pasajero.\n";
     $dni_pasajero = trim(fgets(STDIN));
-    echo "Ingrese sin espacios el número de teléfono del pasajero.\n";
-    $telefono_pasajero = trim(fgets(STDIN));
-    $objPasajero = new Pasajero ();
-    $objPasajero->cargar ($dni_pasajero, $nombre_pasajero, $apellido_pasajero, $telefono_pasajero, $objViaje);
-    $resp = $objPasajero->insertar();
-    if ($resp){
-        echo "Pasajero ingresado correctamente a la base de datos.\n";
+    if ($objPasajero->Buscar($dni_pasajero)){
+        echo "Ese pasajero ya existe.\n";
     } else {
-        echo "El pasajero no pudo ser cargado a la base de datos.\n";
-        echo $objPasajero->getMsjBaseDatos()."\n";
+        echo "Ingrese el nombre del pasajero.\n";
+        $nombre_pasajero = trim(fgets(STDIN));
+        echo "Ingrese el apellido del pasajero.\n";
+        $apellido_pasajero = trim(fgets(STDIN));
+        echo "Ingrese sin espacios el número de teléfono del pasajero.\n";
+        $telefono_pasajero = trim(fgets(STDIN));
+        $idviaje = $objViaje->getIdviaje();
+        $objPasajero->cargar ($dni_pasajero, $nombre_pasajero, $apellido_pasajero, $telefono_pasajero, $objViaje);
+        $resp = $objPasajero->insertar($idviaje);
+        if ($resp){
+            echo "Pasajero ingresado correctamente a la base de datos.\n";
+        } else {
+            echo "El pasajero no pudo ser cargado a la base de datos.\n";
+            echo $objPasajero->getMsjBaseDatos()."\n";
+        }
     }
-    return $resp;
+    
 }
 
 
@@ -317,34 +310,33 @@ function modificarDatos (){
      4) Modificar o eliminar un Pasajero \n
      5) Volver al menú principal. \n";
      $opcion_modificarDatos = trim(fgets(STDIN));
-     if ($opcion_modificarDatos <= 5 && $opcion_modificarDatos >= 1){
-         switch ($opcion_modificarDatos){
-             case 1:
-                    echo "Ingrese el id de la empresa que desea modificar o eliminar.\n";
-                    $idempresa = trim(fgets(STDIN));
-                    modificarEmpresa($idempresa);
-             break; 
-             case 2: 
-                    echo "Ingrese el id del viaje que desea modificar o eliminar.\n";
-                    $idviaje = trim(fgets(STDIN));
-                    modificarViaje ($idviaje);
-             break;
-             case 3:
-                    echo "Ingrese el numero de empleado del responsable que desea modificar o eliminar.\n";
-                    $numEmpleado = trim(fgets(STDIN));
-                    modificarResponsable($numEmpleado);
-             break;
-             case 4: 
-                    echo "Ingrese el numero de documento del pasajero a modificar o eliminar.\n";
-                    $documento = trim(fgets(STDIN));
-                    modificarPasajeros($documento);
-             break;
-             case 5:
-             break;
-         } 
-     } else {
-         echo "Su número no entra en el rango de opciones, vuelva a intentar.\n";
-     }
+     switch ($opcion_modificarDatos){
+        case 1:
+               echo "Ingrese el id de la empresa que desea modificar o eliminar.\n";
+               $idempresa = trim(fgets(STDIN));
+               modificarEmpresa($idempresa);
+        break; 
+        case 2: 
+               echo "Ingrese el id del viaje que desea modificar o eliminar.\n";
+               $idviaje = trim(fgets(STDIN));
+               modificarViaje ($idviaje);
+        break;
+        case 3:
+               echo "Ingrese el numero de empleado del responsable que desea modificar o eliminar.\n";
+               $numEmpleado = trim(fgets(STDIN));
+               modificarResponsable($numEmpleado);
+        break;
+        case 4: 
+               echo "Ingrese el numero de documento del pasajero a modificar o eliminar.\n";
+               $documento = trim(fgets(STDIN));
+               modificarPasajeros($documento);
+        break;
+        case 5:
+        break;
+        default:
+           echo "Su número no entra en el rango de opciones, vuelva a intentar.\n";
+        break;
+    } 
     }while ($opcion_modificarDatos <> 5);
      echo "Datos modificados exitosamente.\n";
  }
@@ -366,24 +358,11 @@ function modificarEmpresa ($idempresa){
             3) Borrar datos de la empresa \n
             4) Volver atrás\n";
             $opcion = trim(fgets(STDIN));
-            if ($opcion <= 4 && $opcion >= 1){
-                switch  ($opcion){ 
-                    case 1: //modificar nombre de la empresa.
-                        echo "Ingrese el nuevo nombre de la empresa.\n";
-                        $new_nombre = trim(fgets(STDIN));
-                        $objEmpresa->setEnombre ($new_nombre);
-                        $resp = $objEmpresa->modificar($idempresa);
-                        if ($resp){
-                            echo "los datos fueron actualizados correctamente. \n";
-                        } else {
-                            echo "No se pudo realizar el cambio.\n";
-                            echo $objEmpresa->getMsjBaseDatos();
-                        }
-                    break;
-                    case 2: //modificar dirección de la empresa.
-                    echo "Ingrese la nueva dirección de la empresa.\n";
-                    $new_direccion = trim(fgets(STDIN));
-                    $objEmpresa->setEnombre ($new_direccion);
+            switch  ($opcion){ 
+                case 1: //modificar nombre de la empresa.
+                    echo "Ingrese el nuevo nombre de la empresa.\n";
+                    $new_nombre = trim(fgets(STDIN));
+                    $objEmpresa->setEnombre ($new_nombre);
                     $resp = $objEmpresa->modificar($idempresa);
                     if ($resp){
                         echo "los datos fueron actualizados correctamente. \n";
@@ -391,26 +370,39 @@ function modificarEmpresa ($idempresa){
                         echo "No se pudo realizar el cambio.\n";
                         echo $objEmpresa->getMsjBaseDatos();
                     }
-                    break;
-                    case 3: //eliminar datos de la empresa                 
-                    echo "Va a eliminar la siguiente empresa: \n". $objEmpresa->__toString(). "\nADVERTENCIA: SE BORRARAN LOS DATOS DE LOS VIAJES QUE TENGAN REGISTRADA ESTA EMPRESA\n ¿Está seguro de hacerlo? S/N.\n";
-                    $eliminar = trim(fgets(STDIN));
-                    if ($eliminar == "S" || $eliminar == "s"){
-                        if ($objEmpresa -> eliminar($idempresa)){
-                            echo "Empresa eliminada correctamente.\n";
-                        } else {
-                            echo "No se pudieron borrar los datos.\n";
-                            echo $objEmpresa -> getMsjBaseDatos();
-                        }
-                    } else {
-                        echo "Se canceló la eliminación de la empresa.\n";
-                    }
-                    break;
-                    case 4: //volver atrás
-                    break;
+                break;
+                case 2: //modificar dirección de la empresa.
+                echo "Ingrese la nueva dirección de la empresa.\n";
+                $new_direccion = trim(fgets(STDIN));
+                $objEmpresa->setEnombre ($new_direccion);
+                $resp = $objEmpresa->modificar($idempresa);
+                if ($resp){
+                    echo "los datos fueron actualizados correctamente. \n";
+                } else {
+                    echo "No se pudo realizar el cambio.\n";
+                    echo $objEmpresa->getMsjBaseDatos();
                 }
-            } else {
-                echo "El número ingresado no está dentro del rango de opciones, por favor vuelva a intentar.\n";
+                break;
+                case 3: //eliminar datos de la empresa                 
+                echo "Va a eliminar la siguiente empresa: \n". $objEmpresa->__toString(). "\nADVERTENCIA: SE BORRARAN LOS DATOS DE LOS VIAJES QUE TENGAN REGISTRADA ESTA EMPRESA\n ¿Está seguro de hacerlo? S/N.\n";
+                $eliminar = trim(fgets(STDIN));
+                if ($eliminar == "S" || $eliminar == "s"){
+                    if ($objEmpresa -> eliminar($idempresa)){
+                        echo "Empresa eliminada correctamente.\n";
+                    } else {
+                        echo "No se pudieron borrar los datos.\n";
+                        echo $objEmpresa -> getMsjBaseDatos();
+                        $opcion = 4;
+                    }
+                } else {
+                    echo "Se canceló la eliminación de la empresa.\n";
+                }
+                break;
+                case 4: //volver atrás
+                break;
+                default:
+                    echo "El número ingresado no está dentro del rango de opciones, por favor vuelva a intentar.\n";
+                break;
             }
         } while ($opcion <> 4);
         echo "Cambios en la empresa realizados exitosamente.\n";
@@ -437,67 +429,67 @@ function modificarResponsable ($numEmpleado){
             3) Modificar el apellido del responsable del viaje \n
             4) Eliminar responsable del viaje.
             5) Volver atrás\n";
-            $opcion_modificarResponsable = trim(fgets(STDIN));
-            if ($opcion_modificarResponsable <= 4 && $opcion_modificarResponsable >= 1){
-                switch  ($opcion_modificarResponsable){ 
-                    case 1: //modificar número de licencia.
-                        echo "Ingrese el nuevo número de licencia.\n";
-                        $new_numLicencia = trim(fgets(STDIN));
-                        $objResponsable -> setRnumerolicencia ($new_numLicencia);
-                        $resp = $objResponsable -> modificar($numEmpleado);
-                        if ($resp){
-                            echo "los datos fueron actualizados correctamente. \n";
-                        } else {
-                            echo "No se pudo realizar el cambio.\n";
-                            echo $objResponsable -> getMsjBaseDatos();
-                        }
-                    break;
-                    case 2: //modificar nombre del responsable.
-                        echo "Ingrese el nuevo nombre.\n";
-                        $new_nombreResponsable = trim(fgets(STDIN));
-                        $objResponsable -> setRnombre ($new_nombreResponsable);
-                        $resp = $objResponsable -> modificar($numEmpleado);
-                        if ($resp){
-                            echo "los datos fueron actualizados correctamente. \n";
-                        } else {
-                            echo "No se pudo realizar el cambio.\n";
-                            echo $objResponsable -> getMsjBaseDatos();
-                        }
-                    break;
-                    case 3: // modificar apellido del responsable. 
-                        echo "Ingrese el nuevo apellido.\n";
-                        $new_apellidoResponsable = trim(fgets(STDIN));
-                        $objResponsable -> setRapellido ($new_apellidoResponsable);
-                        $resp = $objResponsable -> modificar($numEmpleado);
-                        if ($resp){
-                            echo "los datos fueron actualizados correctamente. \n";
-                        } else {
-                            echo "No se pudo realizar el cambio.\n";
-                            echo $objResponsable -> getMsjBaseDatos();
-                        }
-                    break;
-                    case 4: //eliminar registro del responsable
-                        echo "Va a eliminar al siguiente responsable: \n". $objResponsable->__toString(). "\nADVERTENCIA: SE BORRARAN LOS DATOS DE LOS VIAJES EN LOS QUE ESTÉ REGISTRADO\n ¿Está seguro de hacerlo? S/N.\n";
-                        $eliminar = trim(fgets(STDIN));
-                        if ($eliminar == "S" || $eliminar == "s"){
-                            if ($objResponsable -> eliminar($numEmpleado)){
-                                echo "Responsable eliminado correctamente.\n";
-                            } else {
-                                echo "No se pudieron borrar los datos.\n";
-                                echo $objResponsable -> getMsjBaseDatos();
-                            }
-                        } else {
-                            echo "Se canceló la eliminación del responsable.\n";
-                        }
-
-                    break;
-                    case 5: //volver atrás
-                    break;
+            $opcion = trim(fgets(STDIN));
+            switch ($opcion){
+            case 1: //modificar número de licencia.
+                echo "Ingrese el nuevo número de licencia.\n";
+                $new_numLicencia = trim(fgets(STDIN));
+                $objResponsable -> setRnumerolicencia ($new_numLicencia);
+                $resp = $objResponsable -> modificar($numEmpleado);
+                if ($resp){
+                    echo "los datos fueron actualizados correctamente. \n";
+                } else {
+                    echo "No se pudo realizar el cambio.\n";
+                    echo $objResponsable -> getMsjBaseDatos();
                 }
-            } else {
+            break;
+            case 2: //modificar nombre del responsable.
+                echo "Ingrese el nuevo nombre.\n";
+                $new_nombreResponsable = trim(fgets(STDIN));
+                $objResponsable -> setRnombre ($new_nombreResponsable);
+                $resp = $objResponsable -> modificar($numEmpleado);
+                if ($resp){
+                    echo "los datos fueron actualizados correctamente. \n";
+                } else {
+                    echo "No se pudo realizar el cambio.\n";
+                    echo $objResponsable -> getMsjBaseDatos();
+                }
+            break;
+            case 3: // modificar apellido del responsable. 
+                echo "Ingrese el nuevo apellido.\n";
+                $new_apellidoResponsable = trim(fgets(STDIN));
+                $objResponsable -> setRapellido ($new_apellidoResponsable);
+                $resp = $objResponsable -> modificar($numEmpleado);
+                if ($resp){
+                    echo "los datos fueron actualizados correctamente. \n";
+                } else {
+                    echo "No se pudo realizar el cambio.\n";
+                    echo $objResponsable -> getMsjBaseDatos();
+                }
+            break;
+            case 4: //eliminar registro del responsable
+                echo "Va a eliminar al siguiente responsable: \n". $objResponsable->__toString(). "\nADVERTENCIA: SE BORRARAN LOS DATOS DE LOS VIAJES EN LOS QUE ESTÉ REGISTRADO\n ¿Está seguro de hacerlo? S/N.\n";
+                $eliminar = trim(fgets(STDIN));
+                if ($eliminar == "S" || $eliminar == "s"){
+                    if ($objResponsable -> eliminar($numEmpleado)){
+                        echo "Responsable eliminado correctamente.\n";
+                    } else {
+                        echo "No se pudieron borrar los datos.\n";
+                        echo $objResponsable -> getMsjBaseDatos();
+                        $opcion = 5;
+                    }
+                } else {
+                    echo "Se canceló la eliminación del responsable.\n";
+                }
+
+            break;
+            case 5: //volver atrás
+            break;
+            default:
                 echo "El número ingresado no está dentro del rango de opciones, por favor vuelva a intentar.\n";
-            }
-        } while ($opcion_modificarResponsable <> 5);
+            break;
+        }
+        } while ($opcion <> 5);
         echo "Cambios en el responsable del viaje realizados exitosamente.\n";
     } else {
         echo "El registro ingresado no existe.\n";
@@ -527,12 +519,31 @@ function modificarViaje ($idviaje){
             8) Eliminar viaje \n
             9) Volver atrás.\n";
             $opcion_modificarViaje = trim(fgets(STDIN));
-            if ($opcion_modificarViaje <= 9 && $opcion_modificarViaje >= 1){
-                switch ($opcion_modificarViaje ){
-                    case 1: //modificar destino del viaje.
-                        echo "Escriba el nuevo destino. \n";
+            switch ($opcion_modificarViaje ){
+                case 1: //modificar destino del viaje.
+                    do{
+                        echo "Ingrese el nuevo destino del viaje.\n";
                         $destino_nuevo = trim(fgets(STDIN));
-                        $objViaje -> setVdestino ($destino_nuevo);
+                        $existe = existeDestino($destino_nuevo);
+                        if ($existe){
+                            echo "El destino ya existe, inténtelo de nuevo.\n";
+                        }
+                    } while ($existe);
+                    $objViaje -> setVdestino ($destino_nuevo);
+                    $resp = $objViaje -> modificar($idviaje);
+                    if ($resp){
+                        echo "Cambio realizado correctamente.\n";
+                    } else {
+                        echo "No se pudo realizar el cambio.\n";
+                        echo $objViaje -> getMsjBaseDatos();
+                    }
+                break;
+                case 2:
+                    //modificar el máximo de pasajeros.
+                    echo "Escriba el nuevo máximo de pasajeros. \n";
+                    $maximoPasajeros_nuevo = trim(fgets(STDIN));
+                    if ($maximoPasajeros_nuevo >= count($objViaje -> getArrayObjPasajeros())){
+                        $objViaje -> setVcantmaxpasajeros ($maximoPasajeros_nuevo);
                         $resp = $objViaje -> modificar($idviaje);
                         if ($resp){
                             echo "Cambio realizado correctamente.\n";
@@ -540,109 +551,107 @@ function modificarViaje ($idviaje){
                             echo "No se pudo realizar el cambio.\n";
                             echo $objViaje -> getMsjBaseDatos();
                         }
-                    break;
-                    case 2:
-                        //modificar el máximo de pasajeros.
-                        echo "Escriba el nuevo máximo de pasajeros. \n";
-                        $maximoPasajeros_nuevo = trim(fgets(STDIN));
-                        if ($maximoPasajeros_nuevo >= count($objViaje -> getArrayObjPasajeros())){
-                            $objViaje -> setVcantmaxpasajeros ($maximoPasajeros_nuevo);
-                            $resp = $objViaje -> modificar($idviaje);
-                            if ($resp){
-                                echo "Cambio realizado correctamente.\n";
-                            } else {
-                                echo "No se pudo realizar el cambio.\n";
-                                echo $objViaje -> getMsjBaseDatos();
-                            }
-                        } else {
-                            echo "El número ingresado es igual al máximo actual o menor a la cantidad de pasajeros registrados.\n";
-                        }
-    
-                    break; 
-                    case 3: //Modificar empresa registrada 
-                        echo "Ingrese el id de la nueva empresa.\n";
-                        $id_nuevo = trim(fgets(STDIN));
-                        $objEmpresa = new Empresa();
-                        $objEmpresa->Buscar($id_nuevo);
-                        $objViaje -> setObjEmpresa ($objEmpresa);
-                        $resp = $objViaje -> modificar($idviaje);
-                        if ($resp){
-                            echo "Cambio realizado correctamente.\n";
-                        } else {
-                            echo "No se pudo realizar el cambio.\n";
-                            echo $objViaje -> getMsjBaseDatos();
-                        }
-                    break;
-                    case 4: // Modificar responsable a cargo
-                        echo "Ingrese el número de empleado del nuevo responsable.\n";
-                        $numEmpleado_nuevo =trim(fgets(STDIN));
-                        $objResponsable = new ResponsableV();
-                        $objResponsable->Buscar($numEmpleado_nuevo);
-                        $objViaje -> setObjResponsable ($objResponsable);
-                        $resp = $objViaje -> modificar($idviaje);
-                        if ($resp){
-                            echo "Cambio realizado correctamente.\n";
-                        } else {
-                            echo "No se pudo realizar el cambio.\n";
-                            echo $objViaje -> getMsjBaseDatos();
-                        }
-                    break;
-                    case 5: //Modificar importe del viaje
-                        echo "Ingrese el nuevo importe del viaje.\n";
-                        $importe_nuevo = trim(fgets(STDIN));
-                        $objViaje -> setVimporte ($importe_nuevo);
-                        $resp = $objViaje -> modificar($idviaje);
-                        if ($resp){
-                            echo "Cambio realizado correctamente.\n";
-                        } else {
-                            echo "No se pudo realizar el cambio.\n";
-                            echo $objViaje -> getMsjBaseDatos();
-                        }
-                    break;
-                    case 6: //Modificar el tipo de asiento
-                        echo "Ingrese las nuevas características del asiento (cama o semi cama, clase turista o primera clase).\n";
-                        $tipoAsiento_nuevo = trim(fgets(STDIN));
-                        $objViaje -> setTipoAsiento($tipoAsiento_nuevo);
-                        $resp = $objViaje -> modificar($idviaje);
-                        if ($resp){
-                            echo "Cambio realizado correctamente.\n";
-                        } else {
-                            echo "No se pudo realizar el cambio.\n";
-                            echo $objViaje -> getMsjBaseDatos();
-                        }
-                    break;
-                    case 7: //Modificar ida y vuelta
-                        echo "Ingrese la nueva característica ida y vuelta (S/N).\n";
-                        $idayvuelta_nuevo = trim(fgets(STDIN));
-                        $objViaje -> setIdayvuelta ($idayvuelta_nuevo);
-                        $resp = $objViaje -> modificar($idviaje);
-                        if ($resp){
-                            echo "Cambio realizado correctamente.\n";
-                        } else {
-                            echo "No se pudo realizar el cambio.\n";
-                            echo $objViaje -> getMsjBaseDatos();
-                        }
-                    break;
-                    case 8: 
-                        echo "Va a eliminar al siguiente viaje: \n". $objViaje->__toString(). "\nADVERTENCIA: SE BORRARAN LOS DATOS DE LOS PASAJEROS REGISTRADOS EN ESTE VIAJE\n ¿Está seguro de hacerlo? S/N.\n";
-                        $eliminar = trim(fgets(STDIN));
-                        if ($eliminar == "S" || $eliminar == "s"){
-                            if ($objViaje -> eliminar($idviaje)){
-                                echo "Viaje eliminado correctamente.\n";
-                            } else {
-                                echo "No se pudieron borrar los datos.\n";
-                                echo $objViaje -> getMsjBaseDatos();
-                            }
-                        } else {
-                            echo "Se canceló la eliminación del viaje.\n";
-                        }
+                    } else {
+                        echo "El número ingresado es igual al máximo actual o menor a la cantidad de pasajeros registrados.\n";
+                    }
 
-                    break;
-                    case 9: //volver atrás
-                    break;
-                }
-            } else {
+                break; 
+                case 3: //Modificar empresa registrada 
+                    echo "Ingrese el id de la nueva empresa.\n";
+                    $id_nuevo = trim(fgets(STDIN));
+                    $objEmpresa = new Empresa();
+                    if($objEmpresa->Buscar($id_nuevo)){
+                        $objViaje->setObjEmpresa ($objEmpresa);
+                        $resp = $objViaje->modificar($idviaje);
+                        if ($resp){
+                            echo "Cambio realizado correctamente.\n";
+                        } else {
+                            echo "No se pudo realizar el cambio.\n";
+                            echo $objViaje->getMsjBaseDatos();
+                        }
+                    } else {
+                        echo "La empresa ingresada no existe.\n";
+                    }
+                   
+                break;
+                case 4: // Modificar responsable a cargo
+                    echo "Ingrese el número de empleado del nuevo responsable.\n";
+                    $numEmpleado_nuevo =trim(fgets(STDIN));
+                    $objResponsable = new ResponsableV();
+                    if ($objResponsable->Buscar($numEmpleado_nuevo)){
+                        $objViaje->setObjResponsable ($objResponsable);
+                        $resp = $objViaje->modificar($idviaje);
+                        if ($resp){
+                            echo "Cambio realizado correctamente.\n";
+                        } else {
+                            echo "No se pudo realizar el cambio.\n";
+                            echo $objViaje -> getMsjBaseDatos();
+                        }
+                    } else {
+                        echo "El responsable ingresado no existe.\n";
+                    }
+         
+                break;
+                case 5: //Modificar importe del viaje
+                    echo "Ingrese el nuevo importe del viaje.\n";
+                    $importe_nuevo = trim(fgets(STDIN));
+                    $objViaje -> setVimporte ($importe_nuevo);
+                    $resp = $objViaje -> modificar($idviaje);
+                    if ($resp){
+                        echo "Cambio realizado correctamente.\n";
+                    } else {
+                        echo "No se pudo realizar el cambio.\n";
+                        echo $objViaje -> getMsjBaseDatos();
+                    }
+                break;
+                case 6: //Modificar el tipo de asiento
+                    echo "Ingrese las nuevas características del asiento (cama o semi cama, clase turista o primera clase).\n";
+                    $tipoAsiento_nuevo = trim(fgets(STDIN));
+                    $objViaje -> setTipoAsiento($tipoAsiento_nuevo);
+                    $resp = $objViaje -> modificar($idviaje);
+                    if ($resp){
+                        echo "Cambio realizado correctamente.\n";
+                    } else {
+                        echo "No se pudo realizar el cambio.\n";
+                        echo $objViaje -> getMsjBaseDatos();
+                    }
+                break;
+                case 7: //Modificar ida y vuelta
+                    echo "Ingrese la nueva característica ida y vuelta (S/N).\n";
+                    $idayvuelta_nuevo = trim(fgets(STDIN));
+                    $objViaje -> setIdayvuelta ($idayvuelta_nuevo);
+                    $resp = $objViaje -> modificar($idviaje);
+                    if ($resp){
+                        echo "Cambio realizado correctamente.\n";
+                    } else {
+                        echo "No se pudo realizar el cambio.\n";
+                        echo $objViaje -> getMsjBaseDatos();
+                    }
+                break;
+                case 8: 
+                    $destino = $objViaje->getVdestino();
+                    $idviaje = $objViaje->getIdviaje();
+                    $importe = $objViaje->getVimporte();
+                    $tipoAsiento = $objViaje->getTipoAsiento();
+                    echo "Va a eliminar al siguiente viaje: \n ID: $idviaje\nDestino: $destino\nImporte: $importe \nTipo de asiento: $tipoAsiento \nADVERTENCIA: SE BORRARAN LOS DATOS DE LOS PASAJEROS REGISTRADOS EN ESTE VIAJE\n ¿Está seguro de hacerlo? S/N.\n";
+                    $eliminar = trim(fgets(STDIN));
+                    if ($eliminar == "S" || $eliminar == "s"){
+                        if ($objViaje -> eliminar($idviaje)){
+                            echo "Viaje eliminado correctamente.\n";
+                            $opcion=9;
+                        } else {
+                            echo "No se pudieron borrar los datos.\n";
+                            echo $objViaje -> getMsjBaseDatos();
+                        }
+                    } else {
+                        echo "Se canceló la eliminación del viaje.\n";
+                    }
+                break;
+                case 9: //volver atrás
+                break;
+                default: 
                 echo "El número ingresado no está dentro del rango de opciones, por favor, vuelva a intentar.\n";
+                break;
             }
         } while ($opcion_modificarViaje <> 9);
         echo "Datos del VIAJE modificados correctamente.\n";
@@ -666,67 +675,67 @@ function modificarPasajeros ($pdocumento){
             1) Modificar nombre \n
             2) Modificar apellido \n
             3) Modificar número de teléfono \n
-            4) Eliminar pasajero.\n
-            5) Volver atrás \n";
+            4) Cambiar de viaje \n
+            5) Eliminar pasajero.\n
+            6) Volver atrás \n";
             $opcion = trim(fgets(STDIN));
-            if ($opcion <= 5 && $opcion >=1){
-                switch ($opcion){
-                    case 1: //modificar nombre
-                        echo "Ingrese el nombre nuevo.\n";
-                        $nuevo_nombrePasajero = trim(fgets(STDIN));
-                        $objPasajero -> setPnombre ($nuevo_nombrePasajero);
-                        $resp = $objPasajero -> modificar($pdocumento);
+            switch ($opcion){
+                case 1: //modificar nombre
+                    echo "Ingrese el nombre nuevo.\n";
+                    $nuevo_nombrePasajero = trim(fgets(STDIN));
+                    $objPasajero -> setPnombre ($nuevo_nombrePasajero);
+                    $resp = $objPasajero -> modificar($pdocumento);
+                    if ($resp){
+                        echo "Datos actualizados correctamente.\n";
+                    } else {
+                        echo "No se pudo realizar el cambio.\n";
+                        echo $objPasajero -> getMsjBaseDatos();
+                    }
+                break;
+                case 2://modificar apellido
+                    echo "Ingrese el apellido nuevo.\n";
+                    $nuevo_apellidoPasajero = trim(fgets(STDIN));
+                    $objPasajero -> setPapellido ( $nuevo_apellidoPasajero);
+                    $resp = $objPasajero -> modificar($pdocumento);
                         if ($resp){
                             echo "Datos actualizados correctamente.\n";
                         } else {
                             echo "No se pudo realizar el cambio.\n";
                             echo $objPasajero -> getMsjBaseDatos();
                         }
-                    break;
-                    case 2://modificar apellido
-                        echo "Ingrese el apellido nuevo.\n";
-                        $nuevo_apellidoPasajero = trim(fgets(STDIN));
-                        $objPasajero -> setPapellido ( $nuevo_apellidoPasajero);
-                        $resp = $objPasajero -> modificar($pdocumento);
-                        if ($resp){
-                            echo "Datos actualizados correctamente.\n";
+                break;
+                case 3: //modificar número de teléfono
+                    echo "Ingrese el número de teléfono nuevo.\n";
+                    $nuevo_telefonoPasajero = trim(fgets(STDIN));
+                    $objPasajero -> setPtelefono ($nuevo_telefonoPasajero);
+                    if ($objPasajero -> modificar($pdocumento)){
+                        echo "Datos actualizados correctamente.\n";
+                    } else {
+                        echo "No se pudo realizar el cambio.\n";
+                        echo $objPasajero -> getMsjBaseDatos();
+                    }
+                break;
+                case 4: //eliminar pasajero.
+                    echo "Va a eliminar al siguiente pasajero: \n". $objPasajero -> __toString(). "\n ¿Está seguro de hacerlo? S/N.\n";
+                    $eliminar = trim(fgets(STDIN));
+                    if ($eliminar == "S" || $eliminar == "s"){
+                        if ($objPasajero -> eliminar($pdocumento)){
+                            echo "Pasajero eliminado correctamente.\n";
+                            $opcion = 5;
                         } else {
-                            echo "No se pudo realizar el cambio.\n";
+                            echo "No se pudieron borrar los datos.\n";
                             echo $objPasajero -> getMsjBaseDatos();
                         }
-                    break;
-                    case 3: //modificar número de teléfono
-                        echo "Ingrese el número de teléfono nuevo.\n";
-                        $nuevo_telefonoPasajero = trim(fgets(STDIN));
-                        $objPasajero -> setPtelefono ($nuevo_telefonoPasajero);
-                        $resp = $objPasajero -> modificar($pdocumento);
-                        if ($resp){
-                            echo "Datos actualizados correctamente.\n";
-                        } else {
-                            echo "No se pudo realizar el cambio.\n";
-                            echo $objPasajero -> getMsjBaseDatos();
-                        }
-                    break;
-                    case 4: //eliminar pasajero.
-                        echo "Va a eliminar al siguiente pasajero: \n". $objPasajero -> __toString(). "\n ¿Está seguro de hacerlo? S/N.\n";
-                        $eliminar = trim(fgets(STDIN));
-                        if ($eliminar == "S" || $eliminar == "s"){
-                            if ($objPasajero -> eliminar($pdocumento)){
-                                echo "Pasajero eliminado correctamente.\n";
-                            } else {
-                                echo "No se pudieron borrar los datos.\n";
-                                echo $objPasajero -> getMsjBaseDatos();
-                            }
-                        } else {
-                            echo "Se canceló la eliminación del pasajero.\n";
-                        }
-                    break;
-                    case 5://volver atrás.
-                    break;
+                    } else {
+                        echo "Se canceló la eliminación del pasajero.\n";
+                    }
+                break;
+                case 5://volver atrás.
+                break;
+                default: 
+                    echo "El número ingresado no está dentro del rango de opciones, por favor inténtelo de nuevo. \n";
+                break;
                 }
-            } else {
-                echo "El número ingresado no está dentro del rango de opciones, por favor inténtelo de nuevo. \n";
-            }
         
         } while ($opcion <> 5);
     } else {
@@ -735,8 +744,7 @@ function modificarPasajeros ($pdocumento){
 }
 
 function mostrarDatos (){
-    echo "********* MOSTRAR DATOS *********\
-    \nIngrese el id de la empresa cuyos datos quiera ver.\n";
+    echo  "Ingrese el id de la empresa cuyos datos quiera ver.\n";
     $idempresa = trim(fgets(STDIN));
     $objEmpresa = new Empresa;
     if ($objEmpresa->Buscar($idempresa)){

@@ -15,7 +15,7 @@ class Pasajero {
         $this -> pnombre = "";
         $this -> papellido = "";
         $this -> ptelefono = "";
-        $this -> objViaje = null;
+        //$this -> objViaje = null;
     }
 
     //se implementa la función cargar(), que ingresa datos en los atributos, para ser cargados en la bbdd.
@@ -27,9 +27,6 @@ class Pasajero {
         $this -> setPapellido ($apellido);
         $this -> setPtelefono ($telefono);
         $this -> setObjViaje($objViaje);
-		if ($this->getObjViaje()==null){
-			return "No funca\n";
-		}
     }
 
     //se implementan los métodos de acceso
@@ -110,12 +107,12 @@ class Pasajero {
 
     public function __toString()
     {
-        $infoPasajero= "Nro documento: ". $this -> getPdocumento(). "\nNombre: ". $this -> getPnombre().
-        "\nApellido: ". $this->getPapellido(). "\nTeléfono: ". $this->getPtelefono(). "\nId viaje: "/** . $this -> getIdViaje()*/;
+        $infoPasajero= "\n----------------------------------------\nNro documento: {$this -> getPdocumento()}\nNombre: {$this -> getPnombre()}
+        \nApellido:  {$this->getPapellido()} \nTeléfono: {$this->getPtelefono()}\n";
         return $infoPasajero;
     }
 
-    	/**
+    /**
 	 * Recupera los datos de un pasajero por dni
 	 * @param int $pdocumento
 	 * @return true en caso de encontrar los datos, false en caso contrario 
@@ -192,13 +189,12 @@ class Pasajero {
 		 return $arregloPasajeros;
 	}	
 
-    public function insertar(){
+	//decidí agregar por parámetro la variable $idviaje para resolver un error que me tiraba el programa si intentaba recuperar el id directamente desde la clase viaje.
+    public function insertar($idviaje){
 		$base=new BaseDatos();
-		$resp= false;
-		$objViaje = $this->getObjViaje();
-		$idViaje = $objViaje->getIdviaje(); //RESOLVER, no me deja cargar pasajeros :(
+		$resp= false; ;
 		$consultaInsertar="INSERT INTO pasajero(pdocumento, pnombre, papellido, ptelefono, idviaje) 
-				VALUES ({$this->getPdocumento()},'{$this->getPnombre()}','{$this->getPapellido()}',{$this->getPtelefono()},$idViaje)";		
+				VALUES ({$this->getPdocumento()},'{$this->getPnombre()}','{$this->getPapellido()}',{$this->getPtelefono()},$idviaje)";		
 		
 		if($base->Iniciar()){ 
 
@@ -221,10 +217,10 @@ class Pasajero {
 	public function modificar(){
 	    $resp =false; 
 	    $base=new BaseDatos();
-		$objViaje = $this->getObjViaje();
-		$idViaje = $objViaje->getIdviaje();
+		$viaje = $this->getObjViaje(); 
+		$idViaje = $viaje->getIdviaje();
 		$consultaModifica="UPDATE pasajero SET papellido='{$this->getPapellido()}',pnombre='{$this->getPnombre()}'
-                           ,ptelefono={$this->getPtelefono()},idviaje=$idViaje WHERE pdocumento={$this->getPdocumento()}";
+                           ,ptelefono={$this->getPtelefono()}, idviaje=$idViaje WHERE pdocumento={$this->getPdocumento()}";
 		if($base->Iniciar()){
 			if($base->Ejecutar($consultaModifica)){
 			    $resp=  true;

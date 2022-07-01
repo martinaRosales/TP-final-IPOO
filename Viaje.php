@@ -26,8 +26,8 @@ class Viaje{
         $this -> msjBaseDatos = '';
     }
 
-    public function cargar ( $vdestino, $maxPasajeros, $empresa, $responsable, $vimporte, $tipoAsiento, $idayvuelta){ //$idviaje, $pasajeros 
-        //$this -> setIdviaje ($idviaje); 
+    public function cargar ( $idviaje,$vdestino, $maxPasajeros, $empresa, $responsable, $vimporte, $tipoAsiento, $idayvuelta){ //, $pasajeros 
+        $this -> setIdviaje ($idviaje); 
         $this -> setVdestino ($vdestino);
         $this -> setVcantmaxpasajeros ($maxPasajeros);
         $this -> setObjEmpresa ($empresa);
@@ -35,7 +35,6 @@ class Viaje{
         $this -> setVimporte ($vimporte);
         $this -> setTipoAsiento ($tipoAsiento);
         $this -> setIdayvuelta ($idayvuelta);
-       // $this -> setArrayObjPasajeros ($pasajeros);
     }
 
     //se implementan los métodos de acceso
@@ -162,7 +161,7 @@ class Viaje{
     }
 
     //se implementa el método __toString
-    //NECESITO VER COMO RECUPERAR EL ID
+
     public function __toString()
     {
         $responsable = $this->getObjResponsable();
@@ -170,25 +169,26 @@ class Viaje{
         $infoViaje= "**** VIAJE  {$this->getIdviaje()} ****\n 
         Destino: {$this-> getVdestino()} \nCantidad máxima de pasajeros: {$this -> getVcantmaxpasajeros()}
         \nImporte: $  {$this -> getVimporte()} \nTipo asiento: {$this-> getTipoAsiento()}
-        \n Ida y vuelta: {$this->getIdayvuelta()} \nResponsable del viaje:\n $infoResponsable";
-        /** \n** INFO PASAJEROS ** {$this->infoPasajero()}" */
+        \n Ida y vuelta: {$this->getIdayvuelta()} \nResponsable del viaje:\n $infoResponsable
+         \n** INFO PASAJEROS ** {$this->infoPasajero()}" ;
         return $infoViaje;
     }
 
-    //método para extraer la información de los pasajeros
+
     //repetitiva que concatena la información de los pasajeros
     public function infoPasajero (){
         $listaPasajeros = " ";
-        $pasajeros = $this -> getArrayObjPasajeros ();
+        $pasajeros = $this -> arregloPasajeros ();
         for ($i = 0; $i < count ($pasajeros); $i++){
            $listaPasajeros = $listaPasajeros. "\n".$pasajeros[$i]->__toString();
         }
         return $listaPasajeros;
     }
 
+    //método para extraer la información de los pasajeros
     public function arregloPasajeros (){
         $pasajero = new Pasajero();
-        $condicion = "";
+        $condicion = "idviaje={$this->getIdviaje()}";
         $arrayPasajeros = $pasajero -> listar($condicion);
         $this -> setArrayObjPasajeros($arrayPasajeros);
         return $arrayPasajeros;
@@ -219,8 +219,6 @@ class Viaje{
                     $this->setObjResponsable($responsable->Buscar($numEmpleado));
                     $resp= true;
 				}				
-			//$this->setRnumeroempleado
-            //$this->setIdempresa
 		 	}	else {
 		 			$this->setMsjBaseDatos($base->getError());
 		 		
@@ -267,7 +265,7 @@ class Viaje{
 						$this->setObjResponsable(null);
                     }
 					$viaje=new Viaje();
-					$viaje->cargar($vdestino,$vcantmaxpasajeros,$objEmpresa,$objResponsable,$vimporte,$tipoAsiento,$idayvuelta);
+					$viaje->cargar($idviaje,$vdestino,$vcantmaxpasajeros,$objEmpresa,$objResponsable,$vimporte,$tipoAsiento,$idayvuelta);
                     $this->setIdviaje($idviaje);
 					array_push($arregloViajes,$viaje);
 	
@@ -291,7 +289,7 @@ class Viaje{
         $empresa = $this->getObjEmpresa();
         $idempresa = $empresa->getIdempresa();
         $responsable = $this->getObjResponsable();
-        $numEmpleado = $responsable->getRnumeroempleado();
+        $numEmpleado = $responsable->getRnumeroempleado();  
 		$consultaInsertar="INSERT INTO viaje(vdestino, vcantmaxpasajeros, idempresa, rnumeroempleado, vimporte, tipoAsiento, idayvuelta) 
 				VALUES ('{$this->getVdestino()}',{$this->getVcantmaxpasajeros()},$idempresa,$numEmpleado,{$this ->getVimporte()},'{$this -> getTipoAsiento()}','{$this -> getIdayvuelta()}')";
 		

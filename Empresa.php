@@ -16,8 +16,7 @@ class Empresa {
         $this -> edireccion = "";
     }
 
-    public function cargar ( $enombre, $edireccion){//$idempresa, 
-        //$this -> setIdempresa ($idempresa);
+    public function cargar ( $enombre, $edireccion){
         $this -> setEnombre ($enombre);
         $this -> setEdireccion ($edireccion);
     }
@@ -92,7 +91,7 @@ class Empresa {
         $enombre = $this -> getEnombre();
         $edireccion = $this -> getEdireccion();
 
-        $infoEmpresa = "Empresa ". $enombre. "\n". $idempresa. "\nDirección: ". $edireccion. "\nViajes registrados:\n".$this->infoViajes();
+        $infoEmpresa = "Empresa $enombre \n $idempresa \nDirección: $edireccion \nViajes registrados: \n{$this->infoViajes()}";
         return $infoEmpresa; 
     }
 
@@ -105,9 +104,13 @@ class Empresa {
 
 	public function infoViajes (){
 		$arrayViajes = $this->arregloViajes();
-		$infoViajes = "\n";
-		for ($i=0; $i<count($arrayViajes); $i++){
-			$infoViajes=$infoViajes."---------------------------------------------------------------\n".$arrayViajes[$i]->__toString(). "\n";	
+		$infoViajes = "";
+		if (count($arrayViajes)<=0){
+			$infoViajes = $infoViajes. "No hay viajes registrados en esta empresa.\n";
+		} else {
+			for ($i=0; $i<count($arrayViajes); $i++){ 
+				$infoViajes=$infoViajes."---------------------------------------------------------------\n".$arrayViajes[$i]->__toString(). "\n";	
+			}
 		}
 		return $infoViajes;
 	}
